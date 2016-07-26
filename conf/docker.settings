@@ -1,0 +1,40 @@
+# http://stackoverflow.com/questions/26550360/docker-ubuntu-behind-proxy
+
+For Ubuntu 14.04 LTS who uses SysVinit, you should modify /etc/default/docker file:
+
+# cat /etc/default/docker
+# Docker Upstart and SysVinit configuration file
+
+#
+# THIS FILE DOES NOT APPLY TO SYSTEMD
+#
+#   Please see the documentation for "systemd drop-ins":
+#   https://docs.docker.com/engine/articles/systemd/
+#
+
+.......
+# If you need Docker to use an HTTP proxy, it can also be specified here.
+export http_proxy="http://web-proxy.corp.xxxxxx.com:8080/"
+export https_proxy="https://web-proxy.corp.xxxxxx.com:8080/"
+......
+Then restart docker:
+
+service docker restart
+For Ubuntu 16.04 LTS who uses Systemd, you can follow this post:
+
+(1) Create a systemd drop-in directory:
+
+mkdir /etc/systemd/system/docker.service.d
+(2) Add proxy in /etc/systemd/system/docker.service.d/http-proxy.conf file:
+
+# cat /etc/systemd/system/docker.service.d/http-proxy.conf
+[Service]
+Environment="HTTP_PROXY=https://web-proxy.corp.xxxxxx.com:8080/"
+Environment="HTTPS_PROXY=https://web-proxy.corp.xxxxxx.com:8080/"
+Environment="NO_PROXY=localhost,127.0.0.1,localaddress,.localdomain.com"
+(3) Flush changes:
+
+systemctl daemon-reload
+(4) Restart Docker:
+
+systemctl restart docker
